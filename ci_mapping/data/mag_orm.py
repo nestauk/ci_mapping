@@ -44,6 +44,19 @@ class Journal(Base):
     paper = relationship("Paper")
 
 
+class Conference(Base):
+    """Conference where a paper was published."""
+
+    __tablename__ = "mag_paper_conferences"
+
+    id = Column(BIGINT)
+    conference_name = Column(TEXT)
+    paper_id = Column(
+        BIGINT, ForeignKey("mag_papers.id"), primary_key=True, autoincrement=False
+    )
+    paper = relationship("Paper")
+
+
 class PaperAuthor(Base):
     """Authors of a paper."""
     
