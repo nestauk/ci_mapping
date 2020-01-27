@@ -14,4 +14,4 @@ The  Microsoft Academic API key is stored in the `.env` file with the following 
 mag_key = MY_API_KEY
 ```
 
-To learn how to use the API, check the [official documentation](https://docs.microsoft.com/en-us/azure/cognitive-services/academic-knowledge/home).
+To learn how to use the API, check the [official documentation](https://docs.microsoft.com/en-us/azure/cognitive-services/academic-knowledge/home)..
