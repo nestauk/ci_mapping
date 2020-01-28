@@ -26,14 +26,14 @@ from dotenv import load_dotenv, find_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.sql import exists
 from sqlalchemy.orm import sessionmaker
-from fnf.data.mag_orm import Affiliation, AffiliationLocation
-from fnf.data.geocode import place_by_id, place_by_name, parse_response
+from ci_mapping.data.mag_orm import Affiliation, AffiliationLocation
+from ci_mapping.data.geocode import place_by_id, place_by_name, parse_response
 
 if __name__== '__main__':
     logging.basicConfig(level=logging.INFO)
     load_dotenv(find_dotenv())
 
-    # config = fnf.config["data"][""]
+    # config = ci_mapping.config["data"][""]
     db_config = os.getenv("postgresdb")
     key = os.getenv("google_key")
     
