@@ -49,3 +49,20 @@ python parse_mag.py
 ```
 
 to run the parser on the sample data.
+
+## Google Places API ##
+
+### Getting an API key ###
+* Sign in with your Google account to [Google Cloud Platform (GCP)](https://console.cloud.google.com/). 
+* Set up a project and enable billing.
+* Find the **Places API** in the **Marketplace** and enable it.
+* Click on the **CREDENTIALS** tab and generate an API key.
+
+### Using your API key ###
+The Google Places API key is stored in the `.env` file with the following format:
+
+```
+google_key = MY_API_KEY
+```
+
+To learn how to use the API, check the [official documentation](https://developers.google.com/places/web-service/details).

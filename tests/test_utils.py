@@ -1,8 +1,8 @@
 import pytest
 
-from fnf.utils.utils import flatten_lists
-from fnf.utils.utils import unique_dicts
-from fnf.utils.utils import unique_dicts_by_value
+from ci_mapping.utils.utils import flatten_lists
+from ci_mapping.utils.utils import unique_dicts
+from ci_mapping.utils.utils import unique_dicts_by_value
 
 example_list_dict = [
     {"DFN": "Biology", "FId": 86803240},
