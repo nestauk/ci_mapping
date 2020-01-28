@@ -32,3 +32,20 @@ test_postgresdb = postgres+psycopg2://postgres@localhost/postgres
 
 `ai_ci`: the project's database.  
 `postgres`: default database that is shipped with PostgreSQL and used here for testing the ORMs.
+
+## How to collect sample data from MAG to run `parse_mag.py` ##
+Instead of getting all the data for a MAG Field of Study by running the [`query_fos_mag.py`](https://github.com/nestauk/fnf/blob/dev/fnf/query_fos_mag.py), it's preferable to get a small subset in order to test that the MAG response is loaded, parsed and stored in `postgres` correctly.
+
+You should do the following:
+
+``` python
+python sample_mag_data.py
+```
+
+This will query MAG API with Fields of Study (as in `query_fos_mag.py`), create two pickles with five responses (aka papers) each and store them in `data/external/`. You can then do:
+
+``` python
+python parse_mag.py
+```
+
+to run the parser on the sample data.
