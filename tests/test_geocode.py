@@ -1,15 +1,15 @@
 import pytest
 from unittest import mock
 
-from fnf.data.geocode import parse_response
-from fnf.data.geocode import place_by_id
-from fnf.data.geocode import place_by_name
+from ci_mapping.data.geocode import parse_response
+from ci_mapping.data.geocode import place_by_id
+from ci_mapping.data.geocode import place_by_name
 
 FIND_PLACE = "https://maps.googleapis.com/maps/api/place/findplacefromtext/json?"
 PLACE_DETAILS = "https://maps.googleapis.com/maps/api/place/details/json?"
 
 
-@mock.patch("fnf.data.geocode.requests.get", autospec=True)
+@mock.patch("ci_mapping.data.geocode.requests.get", autospec=True)
 def test_google_places_api_queries_correctly(mocked_requests):
     place = "foo bar"
     key = "123"
@@ -26,7 +26,7 @@ def test_google_places_api_queries_correctly(mocked_requests):
     assert mocked_requests.call_args == expected_call_args
 
 
-@mock.patch("fnf.data.geocode.requests.get", autospec=True)
+@mock.patch("ci_mapping.data.geocode.requests.get", autospec=True)
 def test_google_places_api_queries_correctly_with_place_ids(mocked_requests):
     id = "abc123"
     key = "123"
