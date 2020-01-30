@@ -1,7 +1,7 @@
-ci_mapping
+Mapping Collective Intelligence research
 ==============================
 
-A short description of the project.
+This research project aims to provide a large and open evidence base on CI research activity and its intersection with AI research.
 
 Project Organization
 ------------
