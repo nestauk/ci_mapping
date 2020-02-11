@@ -1,8 +1,10 @@
 data:
     mag:
-        year: 1970
+        year: 2000
         metadata: ["Id", "Ti", "AA.AfId","AA.AfN","AA.AuId","AA.DAuN","AA.S","CC","D","F.DFN","F.FId","J.JId","J.JN","Pt","RId","Y","DOI","PB","BT","IA","F.FN", "C.CN", "C.CId"]
-        fos: ["crowdsourcing", "citizen science", "collective intelligence", "wisdom of crowds", "collective wisdom", "wisdom of the crowd", "social computing", "human computation", "collaborative learning"]
+        all_fos: ["crowdsourcing", "citizen science", "collective intelligence", "wisdom of crowds", "collective wisdom", "wisdom of the crowd", "social computing", "human computation", "artificial intelligence", "deep learning", "machine learning", "reinforcement learning", "machine intelligence", "natural language processing", "computer vision"]
+        ci_fos: ["crowdsourcing", "citizen science", "collective intelligence", "wisdom of crowds", "collective wisdom", "wisdom of the crowd", "social computing", "human computation"]
+        ai_fos: ["artificial intelligence", "deep learning", "machine learning", "reinforcement learning", "machine intelligence", "natural language processing", "computer vision"]
         entity_name: 'F.FN'
         query_count: 1000
         store_path: 'data/external/mag_response'
