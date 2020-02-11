@@ -49,7 +49,7 @@ if __name__ == "__main__":
     # API params
     key = os.getenv("mag_key")
     metadata = config["metadata"]
-    fos = config["fos"]
+    fos = config["all_fos"]
     entity_name = config["entity_name"]
     year = config["year"]
     query_count = config["query_count"]
