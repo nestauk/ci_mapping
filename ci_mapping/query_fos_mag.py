@@ -57,14 +57,21 @@ if __name__ == "__main__":
     # Path to external data with file prefix
     store_path = f'{ci_mapping.project_dir}/{config["store_path"]}'
 
-    # Build an expandable query for MAG API
+    # # Build an expandable query for MAG API
     expression = build_composite_expr(fos, entity_name, year)
     logging.info(f"{expression}")
 
     has_content = True
-    i = 1
-
+    i = 0
+    
     # Request the API as long as we receive non-empty responses
+    # for fos in [config["ai_fos"], config["ci_fos"]]:
+    #     has_content = True
+    #     offset = 34000
+        # # Build an expandable query for MAG API
+        # expression = build_composite_expr(fos, entity_name, year)
+        # logging.info(f"{expression}")
+
     while has_content:
         logging.info(f"Query {i} - Offset {offset}...")
 
@@ -75,7 +82,7 @@ if __name__ == "__main__":
 
         with open("_".join([store_path, f"{i}.pickle"]), "wb") as h:
             pickle.dump(results, h)
-        logging.info(f"Number of stored results from query {i}: {len(results)}")
+            logging.info(f"Number of stored results from query {i}: {len(results)}")
 
         i += 1
         offset += query_count

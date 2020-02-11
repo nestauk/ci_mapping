@@ -24,7 +24,7 @@ def build_composite_expr(query_values, entity_name, year):
 
 
 @retry(stop_max_attempt_number=5)
-def query_mag_api(expr, fields, subscription_key, query_count=1000, offset=0):
+def query_mag_api(expr, fields, subscription_key, query_count=1000, offset=0, timeout=30):
     """Posts a query to the Microsoft Academic Graph Evaluate API.
 
     Args:
@@ -43,9 +43,14 @@ def query_mag_api(expr, fields, subscription_key, query_count=1000, offset=0):
         "Ocp-Apim-Subscription-Key": subscription_key,
         "Content-Type": "application/x-www-form-urlencoded",
     }
-    query = f"{expr}&count={query_count}&offset={offset}&model=latest&attributes={','.join(fields)}"
+    query = f"{expr}&count={query_count}&offset={offset}&model=latest&attributes={','.join(fields)}&timeout={timeout}"
 
     r = requests.post(ENDPOINT, data=query.encode("utf-8"), headers=headers)
+    # try:
+    #     r.raise_for_status()
+    # except requests.exceptions.HTTPError as error:
+    #     print(error)
+    #     print(error.response.text)
     r.raise_for_status()
 
     return r.json()
