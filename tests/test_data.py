@@ -1,8 +1,23 @@
 import pytest
 from unittest import mock
 
+from ci_mapping.data.query_mag_composite import build_expr
 from ci_mapping.data.query_mag_composite import query_mag_api
 from ci_mapping.data.query_mag_composite import build_composite_expr
+
+
+class TestBuildExpr:
+    def test_build_expr_correctly_forms_query(self):
+        assert list(build_expr([1, 2], "Id", 1000)) == ["expr=OR(Id=1,Id=2)"]
+        assert list(build_expr(["cat", "dog"], "Ti", 1000)) == [
+            "expr=OR(Ti='cat',Ti='dog')"
+        ]
+
+    def test_build_expr_respects_query_limit_and_returns_remainder(self):
+        assert list(build_expr([1, 2, 3], "Id", 21)) == [
+            "expr=OR(Id=1,Id=2)",
+            "expr=OR(Id=3)",
+        ]
 
 
 def test_build_composite_queries_correctly():
