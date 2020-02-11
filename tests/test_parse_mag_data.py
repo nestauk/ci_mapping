@@ -31,7 +31,7 @@ test_example = {
         {"DAuN": "Bar", "AuId": 2159352281, "AfId": None, "S": 2},
     ],
     "F": [
-        {"DFN": "Petabyte", "FId": 13600138, "FN": 'petabyte'},
+        {"DFN": "Petabyte", "FId": 13600138, "FN": "petabyte"},
         {"DFN": "Oligonucleotide", "FId": 129312508, "FN": "oligonucleotide"},
     ],
     "J": {"JN": "science", "JId": 3880285},
@@ -51,7 +51,7 @@ def test_parse_papers():
         "bibtex_doc_type": "a",
         "references": "[2293000460, 2296125569]",
         "publisher": "American Association for the Advancement of Science",
-        "inverted_abstract": np.nan
+        "inverted_abstract": np.nan,
     }
     result = parse_papers(test_example)
 
