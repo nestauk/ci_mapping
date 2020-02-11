@@ -59,7 +59,7 @@ class Conference(Base):
 
 class PaperAuthor(Base):
     """Authors of a paper."""
-    
+
     __tablename__ = "mag_paper_authors"
 
     paper_id = Column(
@@ -75,7 +75,7 @@ class PaperAuthor(Base):
 
 class Author(Base):
     """Details of an author."""
-    
+
     __tablename__ = "mag_authors"
 
     id = Column(BIGINT, primary_key=True, autoincrement=False)
@@ -94,9 +94,10 @@ class Affiliation(Base):
     author_affiliation = relationship("AuthorAffiliation")
     aff_location = relationship("AffiliationLocation")
 
+
 class AuthorAffiliation(Base):
     """Linking author with their affiliation."""
-    
+
     __tablename__ = "mag_author_affiliation"
 
     affiliation_id = Column(
@@ -121,7 +122,7 @@ class FieldOfStudy(Base):
 
 class PaperFieldsOfStudy(Base):
     """Linking papers with their fields of study."""
-    
+
     __tablename__ = "mag_paper_fields_of_study"
 
     paper_id = Column(
@@ -156,7 +157,20 @@ class AffiliationLocation(Base):
     administrative_area_level_2 = Column(TEXT)
     administrative_area_level_1 = Column(TEXT)
     country = Column(TEXT)
-    geocoded_affiliation = relationship("Affiliation", back_populates='aff_location')
+    geocoded_affiliation = relationship("Affiliation", back_populates="aff_location")
+
+
+class FosMetadata(Base):
+    """Level in the hierarchy and the frequency of a Field of Study."""
+
+    __tablename__ = "mag_field_of_study_metadata"
+    id = Column(
+        BIGINT,
+        ForeignKey("mag_fields_of_study.id"),
+        primary_key=True,
+        autoincrement=False,
+    )
+    level = Column(Integer)
 
 
 if __name__ == "__main__":
@@ -170,10 +184,10 @@ if __name__ == "__main__":
 
     # Try to create the database if it doesn't already exist.
     try:
-        engine = create_engine(os.getenv("test_postgresdb")) 
+        engine = create_engine(os.getenv("test_postgresdb"))
         conn = engine.connect()
-        conn.execute("commit") 
-        conn.execute("create database ai_ci") 
+        conn.execute("commit")
+        conn.execute("create database ai_ci")
         conn.close()
     except exc.DBAPIError as e:
         if isinstance(e.orig, psycopg2.errors.DuplicateDatabase):
@@ -182,6 +196,6 @@ if __name__ == "__main__":
             logging.error(e)
             raise
 
-    db_config = os.getenv('postgresdb')
+    db_config = os.getenv("postgresdb")
     engine = create_engine(db_config)
     Base.metadata.create_all(engine)
