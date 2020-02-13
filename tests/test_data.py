@@ -4,6 +4,7 @@ from unittest import mock
 from ci_mapping.data.query_mag_composite import build_expr
 from ci_mapping.data.query_mag_composite import query_mag_api
 from ci_mapping.data.query_mag_composite import build_composite_expr
+from ci_mapping.data.query_mag_composite import build_composite_expr_date
 
 
 class TestBuildExpr:
@@ -24,6 +25,15 @@ def test_build_composite_queries_correctly():
     assert (
         build_composite_expr(["dog", "cat"], "F.FN", 2000)
         == "expr=OR(And(Composite(F.FN='dog'), Y>=2000), And(Composite(F.FN='cat'), Y>=2000))"
+    )
+
+
+def test_build_composite_by_date_queries_correctly():
+    assert (
+        build_composite_expr_date(
+            ["dog", "cat"], "F.FN", 2000, (("01", "06"), ("01", "01"))
+        )
+        == "expr=OR(And(Composite(F.FN='dog'), D=['2000-01-01','2000-06-01']), And(Composite(F.FN='cat'), D=['2000-01-01','2000-06-01']))"
     )
 
 
