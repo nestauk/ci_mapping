@@ -43,12 +43,12 @@ from ci_mapping.data.query_mag_composite import build_composite_expr_date, query
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     load_dotenv(find_dotenv())
-    
+
     config = ci_mapping.config["data"]["mag"]
     # API params
     key = os.getenv("mag_key")
-    start_year = ci_mapping.config['data']['mag']['timeframe'][0]
-    end_year = ci_mapping.config['data']['mag']['timeframe'][1]
+    start_year = ci_mapping.config["data"]["mag"]["timeframe"][0]
+    end_year = ci_mapping.config["data"]["mag"]["timeframe"][1]
     metadata = config["metadata"]
     all_fos = [config["ci_fos"], config["ml_fos"]]
     entity_name = config["entity_name"]
@@ -61,9 +61,9 @@ if __name__ == "__main__":
     # ML and CI FoS
     for fos in all_fos:
         # Collect data from end_year to start_year
-        for year in range(end_year,start_year-1,-1):
+        for year in range(end_year, start_year - 1, -1):
             # Collect data in 6-month intervals: ((start_month, end_month), (start_day, end_day))
-            for date in [(('01', '06'), ('01', '01')), (('06', '12'), ('01','31'))]:
+            for date in [(("01", "06"), ("01", "01")), (("06", "12"), ("01", "31"))]:
 
                 # Build composite expression
                 expression = build_composite_expr_date(fos, entity_name, year, date)
@@ -71,18 +71,24 @@ if __name__ == "__main__":
 
                 has_content = True
                 offset = 0
-                
+
                 while has_content:
                     logging.info(f"Query {i} - Offset {offset}...")
 
                     data = query_mag_api(
-                        expression, metadata, key, query_count=query_count, offset=offset
+                        expression,
+                        metadata,
+                        key,
+                        query_count=query_count,
+                        offset=offset,
                     )
                     results = [ents for ents in data["entities"]]
 
                     with open("_".join([store_path, f"{i}.pickle"]), "wb") as h:
                         pickle.dump(results, h)
-                        logging.info(f"Number of stored results from query {i}: {len(results)}")
+                        logging.info(
+                            f"Number of stored results from query {i}: {len(results)}"
+                        )
 
                     i += 1
                     offset += query_count
