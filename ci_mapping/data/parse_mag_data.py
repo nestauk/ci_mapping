@@ -37,7 +37,7 @@ def parse_papers(response):
     try:
         d["bibtex_doc_type"] = response["BT"]
     except KeyError as e:
-        logging.info(f"{response['Id']}: {e}")
+        # logging.info(f"{response['Id']}: {e}")
         d["bibtex_doc_type"] = np.nan
     try:
         d["references"] = json.dumps(response["RId"])
