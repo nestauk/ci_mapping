@@ -32,27 +32,27 @@ def parse_papers(response):
     try:
         d["doi"] = response["DOI"]
     except KeyError as e:
-        logging.info(f"{response['Id']}: {e}")
+        # logging.info(f"{response['Id']}: {e}")
         d["doi"] = np.nan
     try:
         d["bibtex_doc_type"] = response["BT"]
     except KeyError as e:
-        logging.info(f"{response['Id']}: {e}")
+        # logging.info(f"{response['Id']}: {e}")
         d["bibtex_doc_type"] = np.nan
     try:
         d["references"] = json.dumps(response["RId"])
     except KeyError as e:
-        logging.info(f"{response['Id']}: {e}")
+        # logging.info(f"{response['Id']}: {e}")
         d["references"] = np.nan
     try:
         d["inverted_abstract"] = json.dumps(response["IA"])
     except KeyError as e:
-        logging.info(f"{response['Id']}: {e}")
+        # logging.info(f"{response['Id']}: {e}")
         d["inverted_abstract"] = np.nan
     try:
         d["publisher"] = response["PB"]
     except KeyError as e:
-        logging.info(f"{response['Id']}: {e}")
+        # logging.info(f"{response['Id']}: {e}")
         d["publisher"] = np.nan
 
     return d
