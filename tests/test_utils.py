@@ -3,6 +3,7 @@ import pytest
 from ci_mapping.utils.utils import flatten_lists
 from ci_mapping.utils.utils import unique_dicts
 from ci_mapping.utils.utils import unique_dicts_by_value
+from ci_mapping.utils.utils import allocate_in_group
 
 example_list_dict = [
     {"DFN": "Biology", "FId": 86803240},
@@ -48,5 +49,44 @@ def test_unique_dicts_by_value():
         {"DFN": "Agar plate", "FId": 62643968},
         {"DFN": "Agar foo bar", "FId": 2778660310},
     ]
+
+    assert result == expected_result
+
+
+def test_allocate_in_groups_ai():
+    lst = ["ai", "foo", "bar"]
+    ai_lst = [
+        "ai",
+    ]
+    ci_lst = ["ci"]
+
+    expected_result = "ai"
+    result = allocate_in_group(lst, ci_lst, ai_lst)
+
+    assert result == expected_result
+
+
+def test_allocate_in_groups_ci():
+    lst = ["ci", "foo", "bar"]
+    ai_lst = [
+        "ai",
+    ]
+    ci_lst = ["ci"]
+
+    expected_result = "ci"
+    result = allocate_in_group(lst, ci_lst, ai_lst)
+
+    assert result == expected_result
+
+
+def test_allocate_in_groups_ai_ci():
+    lst = ["ai", "ci", "foo", "bar"]
+    ai_lst = [
+        "ai",
+    ]
+    ci_lst = ["ci"]
+
+    expected_result = "ai_ci"
+    result = allocate_in_group(lst, ci_lst, ai_lst)
 
     assert result == expected_result
