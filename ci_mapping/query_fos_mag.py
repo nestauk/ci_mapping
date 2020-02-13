@@ -38,54 +38,54 @@ import logging
 import pickle
 from dotenv import load_dotenv, find_dotenv
 import ci_mapping
-from ci_mapping.data.query_mag_composite import build_composite_expr, query_mag_api
+from ci_mapping.data.query_mag_composite import build_composite_expr_date, query_mag_api
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     load_dotenv(find_dotenv())
-
     
     config = ci_mapping.config["data"]["mag"]
     # API params
     key = os.getenv("mag_key")
+    start_year = ci_mapping.config['data']['mag']['timeframe'][0]
+    end_year = ci_mapping.config['data']['mag']['timeframe'][1]
     metadata = config["metadata"]
-    fos = config["all_fos"]
+    all_fos = [config["ci_fos"], config["ml_fos"]]
     entity_name = config["entity_name"]
-    year = config["year"]
     query_count = config["query_count"]
-    offset = 0
     # Path to external data with file prefix
     store_path = f'{ci_mapping.project_dir}/{config["store_path"]}'
-
-    # # Build an expandable query for MAG API
-    expression = build_composite_expr(fos, entity_name, year)
-    logging.info(f"{expression}")
-
-    has_content = True
+    # Count
     i = 0
-    
-    # Request the API as long as we receive non-empty responses
-    # for fos in [config["ai_fos"], config["ci_fos"]]:
-    #     has_content = True
-    #     offset = 34000
-        # # Build an expandable query for MAG API
-        # expression = build_composite_expr(fos, entity_name, year)
-        # logging.info(f"{expression}")
 
-    while has_content:
-        logging.info(f"Query {i} - Offset {offset}...")
+    # ML and CI FoS
+    for fos in all_fos:
+        # Collect data from end_year to start_year
+        for year in range(end_year,start_year-1,-1):
+            # Collect data in 6-month intervals: ((start_month, end_month), (start_day, end_day))
+            for date in [(('01', '06'), ('01', '01')), (('06', '12'), ('01','31'))]:
 
-        data = query_mag_api(
-            expression, metadata, key, query_count=query_count, offset=offset
-        )
-        results = [ents for ents in data["entities"]]
+                # Build composite expression
+                expression = build_composite_expr_date(fos, entity_name, year, date)
+                logging.info(f"{expression}")
 
-        with open("_".join([store_path, f"{i}.pickle"]), "wb") as h:
-            pickle.dump(results, h)
-            logging.info(f"Number of stored results from query {i}: {len(results)}")
+                has_content = True
+                offset = 0
+                
+                while has_content:
+                    logging.info(f"Query {i} - Offset {offset}...")
 
-        i += 1
-        offset += query_count
+                    data = query_mag_api(
+                        expression, metadata, key, query_count=query_count, offset=offset
+                    )
+                    results = [ents for ents in data["entities"]]
 
-        if len(results) < query_count:
-            has_content = False
+                    with open("_".join([store_path, f"{i}.pickle"]), "wb") as h:
+                        pickle.dump(results, h)
+                        logging.info(f"Number of stored results from query {i}: {len(results)}")
+
+                    i += 1
+                    offset += query_count
+
+                    if len(results) < query_count:
+                        has_content = False
