@@ -53,8 +53,8 @@ def allocate_in_group(lst, group1, group2):
 
     """
     if any(fos in lst for fos in group1) and any(fos in lst for fos in group2):
-        return 'ai_ci'
+        return "ai_ci"
     elif any(fos in lst for fos in group1):
-        return 'ci'
+        return "ci"
     else:
-        return 'ai'
+        return "ai"

@@ -33,16 +33,16 @@ if __name__ == "__main__":
     pfos = pd.read_sql(s.query(PaperFieldsOfStudy).statement, s.bind)
 
     # Merge and groupby so that FoS are in a list
-    pfos = pfos.merge(fos, left_on='field_of_study_id', right_on='id')
-    pfos = pd.DataFrame(pfos.groupby('paper_id')['norm_name'].apply(list))
+    pfos = pfos.merge(fos, left_on="field_of_study_id", right_on="id")
+    pfos = pd.DataFrame(pfos.groupby("paper_id")["norm_name"].apply(list))
 
     # Match ci, ai, ai_ci FoS in the list
-    pfos['type'] = pfos.norm_name.apply(allocate_in_group, args=(ci_fos, ai_fos))
+    pfos["type"] = pfos.norm_name.apply(allocate_in_group, args=(ci_fos, ai_fos))
 
     logging.info(f"AI papers: {pfos[pfos['type']=='ai'].shape[0]}")
     logging.info(f"CI papers: {pfos[pfos['type']=='ci'].shape[0]}")
     logging.info(f"AI/CI papers: {pfos[pfos['type']=='ai_ci'].shape[0]}")
-    
+
     for idx, row in pfos.iterrows():
-        s.add(CoreControlGroup(id=idx, type=row['type']))
+        s.add(CoreControlGroup(id=idx, type=row["type"]))
         s.commit()
