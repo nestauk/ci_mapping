@@ -3,6 +3,7 @@ import pytest
 from ci_mapping.utils.utils import flatten_lists
 from ci_mapping.utils.utils import unique_dicts
 from ci_mapping.utils.utils import unique_dicts_by_value
+from ci_mapping.utils.utils import cooccurrence_graph
 
 example_list_dict = [
     {"DFN": "Biology", "FId": 86803240},
@@ -48,5 +49,14 @@ def test_unique_dicts_by_value():
         {"DFN": "Agar plate", "FId": 62643968},
         {"DFN": "Agar foo bar", "FId": 2778660310},
     ]
+
+    assert result == expected_result
+
+
+def test_cooccurrence_graph():
+    data = [["a", "b"], ["a", "b", "c"]]
+
+    expected_result = Counter({("a", "b"): 2, ("a", "c"): 1, ("b", "c"): 1})
+    result = cooccurrence_graph(data)
 
     assert result == expected_result

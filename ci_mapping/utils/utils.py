@@ -1,4 +1,5 @@
-from itertools import chain
+from itertools import chain, combinations
+from collections import Counter
 
 
 def unique_dicts(d):
@@ -38,3 +39,24 @@ def flatten_lists(lst):
     
     """
     return list(chain(*lst))
+
+
+def cooccurrence_graph(elements):
+    """Creates a cooccurrence table from a nested list.
+
+    Args:
+        elements (:obj:`list` of :obj:`list`): Nested list.
+
+    Returns:
+        (`collections.Counter`) of the form Counter({('country_a, country_b), weight})
+
+    """
+    # Get a list of all of the combinations you have
+    expanded = [tuple(combinations(d, 2)) for d in elements]
+    expanded = chain(*expanded)
+
+    # Sort the combinations so that A,B and B,A are treated the same
+    expanded = [tuple(sorted(d)) for d in expanded]
+
+    # count the combinations
+    return Counter(expanded)
