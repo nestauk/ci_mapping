@@ -173,6 +173,16 @@ class FosMetadata(Base):
     level = Column(Integer)
 
 
+class CoreControlGroup(Base):
+    """Shows the subset (AI, AI/CI, CI) of a paper."""
+
+    __tablename__ = "core_control_group"
+    id = Column(
+        BIGINT, ForeignKey("mag_papers.id"), primary_key=True, autoincrement=False
+    )
+    type = Column(TEXT)
+
+
 if __name__ == "__main__":
     import os
     import logging
