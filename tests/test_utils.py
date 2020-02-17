@@ -3,6 +3,7 @@ import pytest
 from ci_mapping.utils.utils import flatten_lists
 from ci_mapping.utils.utils import unique_dicts
 from ci_mapping.utils.utils import unique_dicts_by_value
+from ci_mapping.utils.utils import cooccurrence_graph
 from ci_mapping.utils.utils import allocate_in_group
 
 example_list_dict = [
@@ -53,6 +54,13 @@ def test_unique_dicts_by_value():
     assert result == expected_result
 
 
+def test_cooccurrence_graph():
+    data = [["a", "b"], ["a", "b", "c"]]
+
+    expected_result = Counter({("a", "b"): 2, ("a", "c"): 1, ("b", "c"): 1})
+    result = cooccurrence_graph(data)
+
+
 def test_allocate_in_groups_ai():
     lst = ["ai", "foo", "bar"]
     ai_lst = [
@@ -88,5 +96,5 @@ def test_allocate_in_groups_ai_ci():
 
     expected_result = "ai_ci"
     result = allocate_in_group(lst, ci_lst, ai_lst)
-
+    
     assert result == expected_result
