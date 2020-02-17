@@ -3,6 +3,17 @@ Mapping Collective Intelligence research
 
 This research project aims to provide a large and open evidence base on CI research activity and its intersection with AI research.
 
+## How to use the repo ##
+To rerun the data collection and analysis, create a separate Anaconda environment, run `$ pip install -r requirements.txt` to install the Python packages needed for the project, get the required API keys and setup PostgreSQL as described [here](/ci_mapping/README.md). Then, run the following scripts contained in the `ci_mapping` directory:
+
+1. `$ python data/mag_orm.py`: Creates a PostgreSQL DB named `ai_ci` and the tables needed for this project.
+2. `$ python query_fos_mag.py`: Collects data from MAG for sets of Fields of Study.
+3. `$ python parse_mag.py`: Parses the MAG responses and stores them in PostgreSQL DB.
+4. `$ python geocode_affiliations.py`: Geocodes author affiliations.
+5. `$ python split_core_control.py`: Splits the data in three groups: AI, AI+CI, CI
+6. `$ python collect_fos_level.py`: Collects the level in the MAG hierarchy of the Fields of Study in the DB.
+7. `$ python vizualization/draw_cooccurrence_graph.py` (optional): Filter Fields of Study by level and frequency and draw a cooccurrence network.
+
 Project Organization
 ------------
 
