@@ -1,4 +1,5 @@
 import pytest
+from collections import Counter
 
 from ci_mapping.utils.utils import flatten_lists
 from ci_mapping.utils.utils import unique_dicts
