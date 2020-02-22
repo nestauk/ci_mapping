@@ -4,6 +4,7 @@ from retrying import retry
 
 ENDPOINT = "https://api.labs.cognitive.microsoft.com/academic/v1.0/evaluate"
 
+
 def build_composite_expr_date(query_values, entity_name, year, date):
     """Builds a composite expression with ANDs in OR to be used as MAG query.
 
@@ -19,10 +20,15 @@ def build_composite_expr_date(query_values, entity_name, year, date):
     """
     query_prefix_format = "expr=OR({})"
     and_queries = [
-        "".join([f"And(Composite({entity_name}='{query_value}'), D=['{year}-{date[0][0]}-{date[1][0]}','{year}-{date[0][1]}-{date[1][1]}'])"])
+        "".join(
+            [
+                f"And(Composite({entity_name}='{query_value}'), D=['{year}-{date[0][0]}-{date[1][0]}','{year}-{date[0][1]}-{date[1][1]}'])"
+            ]
+        )
         for query_value in query_values
     ]
     return query_prefix_format.format(", ".join(and_queries))
+
 
 def build_composite_expr(query_values, entity_name, year):
     """Builds a composite expression with ANDs in OR to be used as MAG query.
