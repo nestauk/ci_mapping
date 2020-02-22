@@ -80,4 +80,3 @@ def allocate_in_group(lst, group1, group2):
         return "ci"
     else:
         return "ai"
-

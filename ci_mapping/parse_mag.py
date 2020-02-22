@@ -16,7 +16,7 @@ from ci_mapping.data.parse_mag_data import (
     parse_fos,
     parse_journal,
     parse_papers,
-    parse_conference
+    parse_conference,
 )
 from ci_mapping.data.mag_orm import (
     Paper,
@@ -24,17 +24,19 @@ from ci_mapping.data.mag_orm import (
     Journal,
     Author,
     Affiliation,
-    AuthorAffiliation,
     FieldOfStudy,
     PaperFieldsOfStudy,
-    Conference
+    Conference,
+    AuthorAffiliation,
 )
 
 if __name__ == "__main__":
 
     load_dotenv(find_dotenv())
 
-    external_data = f'{ci_mapping.project_dir}/{ci_mapping.config["data"]["external"]["path"]}'
+    external_data = (
+        f'{ci_mapping.project_dir}/{ci_mapping.config["data"]["external"]["path"]}'
+    )
 
     # Connect to postgresql
     engine = create_engine(os.getenv("postgresdb"))
@@ -84,9 +86,9 @@ if __name__ == "__main__":
     ]
 
     # Parse affiliations
-    items = [parse_affiliations(response) for response in data]
+    items = [parse_affiliations(response, response["Id"]) for response in data]
     affiliations = [d for d in unique_dicts(flatten_lists([item[0] for item in items]))]
-    author_with_aff = [
+    paper_author_aff = [
         d for d in unique_dicts(flatten_lists([item[1] for item in items]))
     ]
     logging.info(f"Parsing completed!")
@@ -99,8 +101,8 @@ if __name__ == "__main__":
     s.bulk_insert_mappings(FieldOfStudy, fields_of_study)
     s.bulk_insert_mappings(PaperFieldsOfStudy, paper_with_fos)
     s.bulk_insert_mappings(Affiliation, affiliations)
-    s.bulk_insert_mappings(AuthorAffiliation, author_with_aff)
+    s.bulk_insert_mappings(AuthorAffiliation, paper_author_aff)
     s.bulk_insert_mappings(Conference, conferences)
-    
+
     s.commit()
     logging.info("Committed to DB")
