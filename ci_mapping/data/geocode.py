@@ -82,24 +82,34 @@ def parse_response(response):
     d["address"] = result["formatted_address"]
     d["name"] = result["name"]
     d["id"] = result["place_id"]
-    d["types"] = result["types"]
+    try:
+        d["types"] = result["types"]
+    except KeyError as e:
+        logging.info(f"{d['name']}: {e}")
+        d["types"] = np.nan
     try:
         d["website"] = result["website"]
     except KeyError as e:
         logging.info(f"{d['name']}: {e}")
         d["website"] = np.nan
-
-    for r in result["address_components"]:
-        if "postal_town" in r["types"]:
-            d["postal_town"] = r["long_name"]
-        elif "administrative_area_level_2" in r["types"]:
-            d["administrative_area_level_2"] = r["long_name"]
-        elif "administrative_area_level_1" in r["types"]:
-            d["administrative_area_level_1"] = r["long_name"]
-        elif "country" in r["types"]:
-            d["country"] = r["long_name"]
-        else:
-            continue
+    try:
+        for r in result["address_components"]:
+            if "postal_town" in r["types"]:
+                d["postal_town"] = r["long_name"]
+            elif "administrative_area_level_2" in r["types"]:
+                d["administrative_area_level_2"] = r["long_name"]
+            elif "administrative_area_level_1" in r["types"]:
+                d["administrative_area_level_1"] = r["long_name"]
+            elif "country" in r["types"]:
+                d["country"] = r["long_name"]
+            else:
+                continue
+    except KeyError as e:
+        logging.info(f"{d['name']}: {e}")
+        d["postal_town"] = np.nan
+        d["administrative_area_level_2"] = np.nan
+        d["administrative_area_level_1"] = np.nan
+        d["country"] = np.nan
 
     return d
 
