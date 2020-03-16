@@ -1,9 +1,9 @@
-.. ci_mapping documentation master file, created by
+.. ai_ci documentation master file, created by
    sphinx-quickstart.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-ci_mapping documentation!
+ai_ci documentation!
 ==============================================
 
 Contents:

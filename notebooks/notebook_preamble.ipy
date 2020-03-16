@@ -2,7 +2,7 @@
 # Note: ipy file suffix neccessary for running with %run magic
 
 # Import our repo as a module
-import ci_mapping
+import ai_ci
 
 ## Logging
 import logging
@@ -46,5 +46,5 @@ import matplotlib.pyplot as plt
 
 ## Paths
 # project directory e.g. `/home/user/GIT/nesta`
-project_dir = ci_mapping.project_dir
+project_dir = ai_ci.project_dir
 data_path = f'{project_dir}/data'
