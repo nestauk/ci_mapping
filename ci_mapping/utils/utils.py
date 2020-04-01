@@ -80,3 +80,14 @@ def allocate_in_group(lst, group1, group2):
         return "ci"
     else:
         return "ai"
+
+
+def identity_tokenizer(tokens):
+    """Passes tokens without processing. Used in a CountVectorizer.
+    Args:
+        tokens (:obj:`list`)
+    
+    Returns:
+        tokens (:obj:`list`)
+    """
+    return tokens

@@ -181,6 +181,21 @@ class CoreControlGroup(Base):
     type = Column(TEXT)
 
 
+class ResearchDiversityCountry(Base):
+    """Research diversity metrics for a country."""
+
+    __tablename__ = "research_diversity_country"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    shannon_diversity = Column(Float)
+    simpson_e_diversity = Column(Float)
+    simpson_diversity = Column(Float)
+    year = Column(TEXT)
+    country = Column(TEXT)
+    type = Column(TEXT)
+    paper_count = Column(Integer)
+
+
 if __name__ == "__main__":
     import os
     import logging
