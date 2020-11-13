@@ -60,30 +60,15 @@ def test_cooccurrence_graph():
 
     expected_result = Counter({("a", "b"): 2, ("a", "c"): 1, ("b", "c"): 1})
     result = cooccurrence_graph(data)
-
-
-def test_allocate_in_groups_ai():
-    lst = ["ai", "foo", "bar"]
-    ai_lst = [
-        "ai",
-    ]
-    ci_lst = ["ci"]
-
-    expected_result = "ai"
-    result = allocate_in_group(lst, ci_lst, ai_lst)
-
     assert result == expected_result
 
 
 def test_allocate_in_groups_ci():
     lst = ["ci", "foo", "bar"]
-    ai_lst = [
-        "ai",
-    ]
-    ci_lst = ["ci"]
+    ai_lst = ["ai"]
 
-    expected_result = "ci"
-    result = allocate_in_group(lst, ci_lst, ai_lst)
+    expected_result = "CI"
+    result = allocate_in_group(lst, ai_lst)
 
     assert result == expected_result
 
@@ -93,9 +78,8 @@ def test_allocate_in_groups_ai_ci():
     ai_lst = [
         "ai",
     ]
-    ci_lst = ["ci"]
 
-    expected_result = "ai_ci"
-    result = allocate_in_group(lst, ci_lst, ai_lst)
-    
+    expected_result = "AI_CI"
+    result = allocate_in_group(lst, ai_lst)
+
     assert result == expected_result

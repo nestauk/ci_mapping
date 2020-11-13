@@ -5,24 +5,23 @@ from retrying import retry
 ENDPOINT = "https://api.labs.cognitive.microsoft.com/academic/v1.0/evaluate"
 
 
-def build_composite_expr_date(query_values, entity_name, year, date):
+def build_composite_expr(query_values, entity_name, date):
     """Builds a composite expression with ANDs in OR to be used as MAG query.
 
     Args:
         query_values (:obj:`list` of str): Phrases to query MAG with. 
         entity_name (str): MAG attribute that will be used in query.
-        year (int): Collecting data for a particular year.
-        date (:obj:`tuple` of `tuple`): Nested tuples of the form 
-            ((start_month, end_month), (start_day, end_day)). 
+        date (:obj:`tuple` of `str`): Time period of the data collection.
+
     Returns:
         (str) MAG expression.
-    
+
     """
     query_prefix_format = "expr=OR({})"
     and_queries = [
         "".join(
             [
-                f"And(Composite({entity_name}='{query_value}'), D=['{year}-{date[0][0]}-{date[1][0]}','{year}-{date[0][1]}-{date[1][1]}'])"
+                f"And(Composite({entity_name}='{query_value}'), D=['{date[0]}', '{date[1]}'])"
             ]
         )
         for query_value in query_values
@@ -30,26 +29,7 @@ def build_composite_expr_date(query_values, entity_name, year, date):
     return query_prefix_format.format(", ".join(and_queries))
 
 
-def build_composite_expr(query_values, entity_name, year):
-    """Builds a composite expression with ANDs in OR to be used as MAG query.
-
-    Args:
-        query_values (:obj:`list` of str): Phrases to query MAG with. 
-        entity_name (str): MAG attribute that will be used in query.
-        year (int): Collecting data for a particular year.
-    Returns:
-        (str) MAG expression.
-    
-    """
-    query_prefix_format = "expr=OR({})"
-    and_queries = [
-        "".join([f"And(Composite({entity_name}='{query_value}'), Y>={year})"])
-        for query_value in query_values
-    ]
-    return query_prefix_format.format(", ".join(and_queries))
-
-
-@retry(stop_max_attempt_number=5)
+@retry(stop_max_attempt_number=10)
 def query_mag_api(expr, fields, subscription_key, query_count=1000, offset=0):
     """Posts a query to the Microsoft Academic Graph Evaluate API.
 
@@ -69,15 +49,10 @@ def query_mag_api(expr, fields, subscription_key, query_count=1000, offset=0):
         "Ocp-Apim-Subscription-Key": subscription_key,
         "Content-Type": "application/x-www-form-urlencoded",
     }
-    query = f"{expr}&count={query_count}&offset={offset}&model=latest&attributes={','.join(fields)}"
+    query = f"{expr}&count={query_count}&offset={offset}&attributes={','.join(fields)}"
 
     r = requests.post(ENDPOINT, data=query.encode("utf-8"), headers=headers)
-    try:
-        r.raise_for_status()
-    except requests.exceptions.HTTPError as error:
-        print(error)
-        print(error.response.text)
-    # r.raise_for_status()
+    r.raise_for_status()
 
     return r.json()
 
@@ -197,7 +172,7 @@ def query_fields_of_study(
                         # no parents and/or children
                         pass
 
-                logging.info(f"new fos: {row}")
+                # logging.info(f"new fos: {row}")
                 yield row
 
             offset += len(fos_data["entities"])

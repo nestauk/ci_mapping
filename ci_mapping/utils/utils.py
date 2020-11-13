@@ -1,5 +1,6 @@
 from itertools import chain, combinations
 from collections import Counter
+from datetime import datetime
 
 
 def unique_dicts(d):
@@ -62,7 +63,7 @@ def cooccurrence_graph(elements):
     return Counter(expanded)
 
 
-def allocate_in_group(lst, group1, group2):
+def allocate_in_group(lst, fos_subset, tag="CI", fos_subset_tag="AI_CI"):
     """Find Fields of Study in a list.
 
     Args:
@@ -74,9 +75,42 @@ def allocate_in_group(lst, group1, group2):
         (str)
 
     """
-    if any(fos in lst for fos in group1) and any(fos in lst for fos in group2):
-        return "ai_ci"
-    elif any(fos in lst for fos in group1):
-        return "ci"
+    if len(set(fos_subset) & set(lst)) > 0:
+        return fos_subset_tag
     else:
-        return "ai"
+        return tag
+
+
+def str2datetime(input_date):
+    """Transform a string to datetime object.
+
+    Args:
+        input_date (str): String date of the format Y-m-d. It can
+            also be 'today' which will return today's date.
+
+    Returns:
+        (`datetime.datetime`)
+
+    """
+    if input_date == "today":
+        return datetime.today()
+    else:
+        return datetime.strptime(input_date, "%Y-%m-%d")
+
+
+def date_range(start, end, intv):
+    """Splits a date range into intervals.
+
+    Args:
+        start (str): Start date of the format (Y-m-d).
+        intv (int): Number of intervals.
+        end (str): End date of the format (Y-m-d).
+
+    Returns:
+        (:obj:`generator` of `str`) Dates with the (Y-m-d) format.
+
+    """
+    diff = (end - start) / intv
+    for i in range(intv):
+        yield (start + diff * i).strftime("%Y-%m-%d")
+    yield end.strftime("%Y-%m-%d")
