@@ -181,6 +181,26 @@ class CoreControlGroup(Base):
     type = Column(TEXT)
 
 
+class OpenAccess(Base):
+    """Flags open access journals."""
+
+    __tablename__ = "open_access_journals"
+
+    id = Column(BIGINT, primary_key=True)
+    open_access = Column(Integer)
+
+
+class AffiliationType(Base):
+    """Type (1: non-industry, 0: industry) of an affiliation."""
+
+    __tablename__ = "affiliation_type"
+
+    id = Column(
+        BIGINT, ForeignKey("mag_affiliation.id"), primary_key=True, autoincrement=False
+    )
+    type = Column(Integer)
+
+
 if __name__ == "__main__":
     import os
     import logging
@@ -192,10 +212,10 @@ if __name__ == "__main__":
 
     # Try to create the database if it doesn't already exist.
     try:
-        engine = create_engine(os.getenv("test_postgresdb"))
+        engine = create_engine(os.getenv("test_db"))
         conn = engine.connect()
         conn.execute("commit")
-        conn.execute("create database ai_ci")
+        conn.execute("create database ci_db")
         conn.close()
     except exc.DBAPIError as e:
         if isinstance(e.orig, psycopg2.errors.DuplicateDatabase):
@@ -204,6 +224,6 @@ if __name__ == "__main__":
             logging.error(e)
             raise
 
-    db_config = os.getenv("postgresdb")
+    db_config = os.getenv("ci_db")
     engine = create_engine(db_config)
     Base.metadata.create_all(engine)

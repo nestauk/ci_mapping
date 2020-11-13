@@ -1,6 +1,6 @@
 """
 Queries Microsoft Academic Knowledge API with Fields of Study (paper keywords) and stores the responses locally.
-The pickle file is a list of JSONs where every JSON object is the API response corresponsing to a paper. Every 
+The pickle file is a list of JSONs where every JSON object is the API response corresponding to a paper. Every 
 pickle contains a maximum of 1,000 objects (that's the maximum number of papers we can retrieve from MAG with a
 query).
 
@@ -38,7 +38,11 @@ import logging
 import pickle
 from dotenv import load_dotenv, find_dotenv
 import ci_mapping
-from ci_mapping.data.query_mag_composite import build_composite_expr_date, query_mag_api
+from ci_mapping.packages.mag.query_mag_api import (
+    query_mag_api,
+    query_fields_of_study,
+    build_composite_expr,
+)
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
