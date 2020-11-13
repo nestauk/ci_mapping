@@ -3,6 +3,17 @@ For bugs/issues, contact the Nesta team or myself at k.stathou@gmail.com.
 """
 
 from metaflow import FlowSpec, step, Parameter
+import pandas as pd
+from sqlalchemy.sql import exists
+from sqlalchemy import create_engine, and_
+from sqlalchemy.orm import sessionmaker
+from dotenv import load_dotenv, find_dotenv
+import glob
+import toolz
+import pickle
+import os
+import ci_mapping
+from ci_mapping import logger
 from ci_mapping.data.create_db_and_tables import create_db_and_tables
 from ci_mapping.data.query_mag import (
     query_mag_api,
@@ -10,16 +21,8 @@ from ci_mapping.data.query_mag import (
     build_composite_expr,
 )
 from ci_mapping.data.geocode import place_by_id, place_by_name, parse_response
-import pandas as pd
-from sqlalchemy.sql import exists
-from sqlalchemy import create_engine, and_
-from sqlalchemy.orm import sessionmaker
-from dotenv import load_dotenv, find_dotenv
-import ci_mapping
-from ci_mapping import logger
-import glob
-import toolz
 from ci_mapping.utils.utils import unique_dicts, unique_dicts_by_value, flatten_lists
+from ci_mapping.utils.utils import date_range, str2datetime, allocate_in_group
 from ci_mapping.data.parse_mag_data import (
     parse_affiliations,
     parse_authors,
@@ -44,9 +47,6 @@ from ci_mapping.data.mag_orm import (
     AffiliationType,
     OpenAccess,
 )
-import pickle
-from ci_mapping.utils.utils import date_range, str2datetime, allocate_in_group
-import os
 
 load_dotenv(find_dotenv())
 config = ci_mapping.config["data"]
