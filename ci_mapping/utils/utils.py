@@ -1,6 +1,34 @@
 from itertools import chain, combinations
-from collections import Counter
+from collections import OrderedDict, Counter
 from datetime import datetime
+import numpy as np
+
+
+def inverted2abstract(obj):
+    """Transforms an inverted abstract to abstract.
+    
+    Args:
+        obj (json): Inverted Abstract.
+
+    Returns:
+        (str): Formatted abstract.
+    
+    """
+    if isinstance(obj, dict):
+        inverted_index = obj["InvertedIndex"]
+        d = {}
+        for k, v in inverted_index.items():
+            if len(v) == 1:
+                d[v[0]] = k
+            else:
+                for idx in v:
+                    d[idx] = k
+
+        return " ".join([v for _, v in OrderedDict(sorted(d.items())).items()]).replace(
+            "\x00", ""
+        )
+    else:
+        return np.nan
 
 
 def unique_dicts(d):

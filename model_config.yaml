@@ -326,3 +326,6 @@ open_access:
         "arxiv nuclear experiment",
         "arxiv number theory",
     ]
+plots:
+    fos_levels: [1, 2, 3, 4]
+    top_n: 20

@@ -47,10 +47,25 @@ from ci_mapping.data.mag_orm import (
     AffiliationType,
     OpenAccess,
 )
+from ci_mapping.analysis.descriptive_analysis import (
+    annual_publication_increase,
+    annual_citation_sum,
+    publications_by_affiliation_type,
+    international_collaborations,
+    industry_non_industry_collaborations,
+    open_access_publications,
+    annual_fields_of_study_usage,
+    papers_in_journals_and_conferences,
+)
+from ci_mapping.analysis.data_cleaning import (
+    clean_data,
+    clean_author_affiliations,
+)
 
 load_dotenv(find_dotenv())
 config = ci_mapping.config["data"]
 mag_config = ci_mapping.config["data"]["mag"]
+plot_config = ci_mapping.config["plots"]
 
 
 class CollectiveIntelligenceFlow(FlowSpec):
@@ -121,6 +136,16 @@ class CollectiveIntelligenceFlow(FlowSpec):
         help="List of non-industry affiliations.",
         default=ci_mapping.config["affiliations"]["non_industry"],
     )
+    fos_levels = Parameter(
+        "fos_levels",
+        help="Field of Study level to create Figure 7 for.",
+        default=plot_config["fos_levels"],
+    )
+    top_n = Parameter(
+        "top_n",
+        help="Number of most used FoS to plot in Figure 7.",
+        default=plot_config["top_n"],
+    )
 
     def _create_session(self):
         """Creates a PostgreSQL session."""
@@ -148,7 +173,7 @@ class CollectiveIntelligenceFlow(FlowSpec):
         create_db_and_tables(self.db_name)
 
         # Proceed to next task
-        # self.next(self.geocode_affiliation)
+        # self.next(self.data_wrangling)
         self.next(self.collect_mag)
 
     @step
@@ -362,7 +387,7 @@ class CollectiveIntelligenceFlow(FlowSpec):
             s.add(CoreControlGroup(id=idx, type=row["type"]))
             s.commit()
 
-        self.next(self.open_access_journals)
+        # self.next(self.open_access_journals)
         self.next(self.geocode_affiliation)
 
     @step
@@ -426,11 +451,12 @@ class CollectiveIntelligenceFlow(FlowSpec):
         s.query(AffiliationType).delete()
         s.commit()
 
+        logger.info(self.non_industry)
         # Get affiliation names and IDs
         aff_types = [
             {
                 "id": aff.id,
-                "non_industry": self._find_non_industry_affiliations(aff.affiliation),
+                "type": self._find_non_industry_affiliations(aff.affiliation),
             }
             for aff in s.query(Affiliation)
             .filter(and_(~exists().where(Affiliation.id == AffiliationType.id)))
@@ -441,6 +467,60 @@ class CollectiveIntelligenceFlow(FlowSpec):
         # Store affiliation types
         s.bulk_insert_mappings(AffiliationType, aff_types)
         s.commit()
+
+        self.next(self.data_wrangling)
+
+    @step
+    def data_wrangling(self):
+        """Cleaning data for exploratory data analysis."""
+        # Connect to postgresql
+        s = self._create_session()
+
+        # Read geocoded affiliations
+        self.aff_location = pd.read_sql(s.query(AffiliationLocation).statement, s.bind)
+        self.aff_location = self.aff_location.dropna(subset=["country"])
+        # Read journals, open access flag and conferences
+        self.journals = pd.read_sql(s.query(Journal).statement, s.bind)
+        self.open_access = pd.read_sql(s.query(OpenAccess).statement, s.bind)
+        self.conferences = pd.read_sql(s.query(Conference).statement, s.bind)
+        # Read Fields of Study and their metadata (level in hierarchy)
+        pfos = pd.read_sql(s.query(PaperFieldsOfStudy).statement, s.bind)
+        fos = pd.read_sql(s.query(FieldOfStudy).statement, s.bind)
+        self.pfos = pfos.merge(fos, left_on="field_of_study_id", right_on="id")[
+            ["paper_id", "field_of_study_id", "name"]
+        ]
+        self.fos_metadata = pd.read_sql(s.query(FosMetadata).statement, s.bind)
+
+        # Data wrangling
+        self.data = clean_data(s)
+        self.aff_papers, self.paper_author_aff = clean_author_affiliations(s, self.data)
+
+        self.next(self.eda)
+
+    @step
+    def eda(self):
+        """Exploratory data analysis of the CI research landscape."""
+        # Figure 1: Annual publication increase (base year: 2000)
+        annual_publication_increase(self.data)
+        # Figure 2: Annual sum of citations
+        annual_citation_sum(self.data)
+        # Figure 3: Publications by industry and non-industry affiliations
+        publications_by_affiliation_type(self.aff_papers)
+        # Figure 4: International collaborations: % of cross-country teams in CI, AI+CI
+        international_collaborations(self.paper_author_aff, self.aff_location)
+        # Figure 5: Industry - academia collaborations: % in CI, AI+CI
+        industry_non_industry_collaborations(self.paper_author_aff)
+        # Figure 6: Adoption of open access by CI, AI+CI
+        open_access_publications(self.data, self.journals, self.open_access)
+        # Figure 7: Field of study comparison for CI, AI+CI.
+        for fos_level in self.fos_levels:
+            annual_fields_of_study_usage(
+                self.data, self.pfos, self.fos_metadata, fos_level, self.top_n
+            )
+        # Figure 8: Annual publications in conferences and journals.
+        papers_in_journals_and_conferences(
+            self.data, self.journals, self.conferences, self.top_n
+        )
 
         self.next(self.end)
 
