@@ -1,7 +1,7 @@
 seed: 42
 data:
     db_name: "ci_db"
-    external_path: "data/external/"
+    external_path: "data/raw/"
     mag:
         query_values:
             [
@@ -44,10 +44,10 @@ data:
                 "F.FN",
             ]
         with_doi: False
-        mag_start_date: "2000-01-01"
+        mag_start_date: "2020-01-01"
         mag_end_date: "today"
         intervals_in_a_year: 6
-        store_path: "data/external/mag_response"
+        store_path: "data/raw/mag_response"
 fos_subset:
     [
         "deep learning",
@@ -326,3 +326,6 @@ open_access:
         "arxiv nuclear experiment",
         "arxiv number theory",
     ]
+plots:
+    fos_levels: [1, 2, 3, 4]
+    top_n: 20

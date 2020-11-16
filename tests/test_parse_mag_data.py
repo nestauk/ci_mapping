@@ -51,7 +51,7 @@ def test_parse_papers():
         "bibtex_doc_type": "a",
         "references": "[2293000460, 2296125569]",
         "publisher": "American Association for the Advancement of Science",
-        "inverted_abstract": np.nan,
+        "abstract": np.nan,
     }
     result = parse_papers(test_example)
 

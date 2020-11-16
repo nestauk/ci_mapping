@@ -25,7 +25,7 @@ class Paper(Base):
     doi = Column(VARCHAR(200))
     publisher = Column(TEXT)
     bibtex_doc_type = Column(TEXT)
-    inverted_abstract = Column(TEXT)
+    abstract = Column(TEXT)
     journals = relationship("Journal", back_populates="paper")
     fields_of_study = relationship("PaperFieldsOfStudy", back_populates="paper")
     authors = relationship("PaperAuthor", back_populates="paper")

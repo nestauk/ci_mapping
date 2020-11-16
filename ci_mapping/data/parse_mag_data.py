@@ -4,6 +4,7 @@ Parses data from a MAG API response (JSON format). There are modules to parse pa
 import json
 import logging
 import numpy as np
+from ci_mapping.utils.utils import inverted2abstract
 
 
 def parse_papers(response):
@@ -45,10 +46,10 @@ def parse_papers(response):
         # logging.info(f"{response['Id']}: {e}")
         d["references"] = np.nan
     try:
-        d["inverted_abstract"] = json.dumps(response["IA"])
+        d["abstract"] = inverted2abstract(response["IA"])
     except KeyError as e:
         # logging.info(f"{response['Id']}: {e}")
-        d["inverted_abstract"] = np.nan
+        d["abstract"] = np.nan
     try:
         d["publisher"] = response["PB"]
     except KeyError as e:
