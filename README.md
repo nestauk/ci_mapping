@@ -20,9 +20,9 @@ The work in this repository is organised in a metaflow pipeline with the followi
     - International collaborations: % of cross-country teams in CI, AI+CI
     - Industry - academia collaborations: % in CI, AI+CI
     - Adoption of open access by CI, AI+CI
-    - Field of study comparison for CI, AI+CI. Produce plots for levels 1, 2, 3 and 4 of the MAG hierarchy.
+    - Field of study comparison for CI, AI+CI. Produce plots for levels 1, 2, 3 and 4 of the MAG hierarchy. Also possible to produce a plot for a pre-selected list of Fields of Study.
     - Annual publications in conferences and journals.
-
+    - Number of annual publications in CI, AI+CI.
 
 ### Notes
 - You can use the same pipeline to query MAG with a conference or journal name as described in [Orion's docs](https://docs.orion-search.org/docs/The%20model%20config%20file#querying-microsoft-academic-knowledge-api).

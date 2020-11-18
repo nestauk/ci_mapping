@@ -2,6 +2,7 @@ import pandas as pd
 import altair as alt
 import ci_mapping
 from ci_mapping import logger
+from ci_mapping.utils.utils import flatten_lists
 
 
 def annual_publication_increase(data, filename="annual_publication_increase"):
@@ -40,6 +41,39 @@ def annual_publication_increase(data, filename="annual_publication_increase"):
     logger.info(f"Stored {filename} plot.")
 
 
+def annual_publication_count(data, filename="annual_publication_count"):
+    """Annual number of publications.
+
+    Args:
+        data (`pd.DataFrame`): MAG paper data.
+        filename (str): Name of the HTML file to store the plot.
+
+    """
+    frames = []
+    for cat in data.type.unique():
+        frame = pd.DataFrame(
+            data[data.type == cat].groupby("year")["id"].count()
+        ).reset_index()
+        frame = pd.DataFrame(frame).rename(index=str, columns={"id": "value"})
+        frame["type"] = cat
+        frames.append(frame)
+
+    df = pd.concat(frames)
+
+    # Plotting
+    alt.Chart(df).mark_line(point=True).encode(
+        alt.X("year", axis=alt.Axis(labelFontSize=12, titleFontSize=12)),
+        alt.Y("value", axis=alt.Axis(labelFontSize=12, titleFontSize=12)),
+        alt.Color("type", legend=alt.Legend(title="Category")),
+        tooltip=["year", "value", "type"],
+    ).properties(title="Annual number of publications").configure_legend(
+        titleFontSize=12, labelFontSize=12
+    ).interactive().save(
+        f"{ci_mapping.project_dir}/reports/figures/{filename}.html"
+    )
+    logger.info(f"Stored {filename} plot.")
+
+
 def annual_citation_sum(data, filename="annual_citation_sum"):
     """Sum of annual citations for CI and AI+CI.
 
@@ -60,7 +94,11 @@ def annual_citation_sum(data, filename="annual_citation_sum"):
             legend=alt.Legend(title="Citations"),
         ),
         alt.Color("type", legend=None),
-    ).properties(width=780, height=150, title="Sum of citations for CI and AI+CI").save(
+    ).properties(
+        width=780,
+        height=150,
+        title="Total citations for CI and AI+CI papers published in a year",
+    ).save(
         f"{ci_mapping.project_dir}/reports/figures/{filename}.html"
     )
     logger.info(f"Stored {filename} plot.")
@@ -90,7 +128,7 @@ def publications_by_affiliation_type(data, filename="publications_by_affiliation
     df = pd.concat(frames)
 
     # Plotting
-    alt.Chart(df).mark_point(opacity=1, filled=True, size=50).encode(
+    alt.Chart(df).mark_point(opacity=1, filled=True, size=80).encode(
         alt.X("category:N", title=None),
         alt.Y("value:Q",),
         alt.Color("type:N", legend=alt.Legend(title="Category")),
@@ -136,7 +174,7 @@ def international_collaborations(
     # Plotting
     bubbles = (
         alt.Chart(df)
-        .mark_point(opacity=1, filled=True, size=50)
+        .mark_point(opacity=1, filled=True, size=80)
         .encode(
             alt.X(
                 "year",
@@ -191,7 +229,7 @@ def industry_non_industry_collaborations(
     # Plotting
     bubbles = (
         alt.Chart(df)
-        .mark_point(opacity=1, filled=True, size=50)
+        .mark_point(opacity=1, filled=True, size=80)
         .encode(
             alt.X(
                 "year",
@@ -259,7 +297,7 @@ def open_access_publications(
 
     df = pd.concat(frames)
 
-    alt.Chart(df).mark_point(opacity=1, filled=True, size=50).encode(
+    alt.Chart(df).mark_point(opacity=1, filled=True, size=80).encode(
         alt.X("category:N", title=None),
         alt.Y("value:Q"),
         alt.Color("type:N", legend=alt.Legend(title="Category")),
@@ -274,76 +312,7 @@ def open_access_publications(
     logger.info(f"Stored {filename} plot.")
 
 
-def annual_fields_of_study_usage(
-    data, pfos, fos_metadata, fos_level, top_n, filename="annual_fields_of_study_usage"
-):
-    """Field of study comparison for CI, AI+CI. 
-
-    Args:
-        data (`pd.DataFrame`): MAG paper data.
-        pfos (`pd.DataFrame`): Paper-level fields of study.
-        fos_metadata (`pd.DataFrame`): Level of the FoS in MAG hierarchy.
-        fos_level (int): Level in the MAG hierarchy to plot for.
-        top_n (int): Number of most used FoS to plot.
-        filename (str): Name of the HTML file to store the plot.
-
-    """
-    df = data.merge(pfos, left_on="id", right_on="paper_id").merge(
-        fos_metadata, left_on="field_of_study_id", right_on="id"
-    )
-    df = df[df["level"] == fos_level][["paper_id", "type", "year", "name"]]
-
-    # Combine most used CI and AI+CI FoS
-    ci_top_fos = df[df.type == "CI"].name.value_counts().index[:top_n]
-    aici_top_fos = df[df.type == "AI_CI"].name.value_counts().index[:top_n]
-    combined_fos = [
-        x
-        for x in set(ci_top_fos.append(aici_top_fos))
-        if x != "The other" and x != "Effect of" and x != "Wide range"
-    ]
-
-    df = pd.DataFrame(
-        df.groupby(["type", "year", "name"])["paper_id"].count()
-    ).reset_index()
-    df = df[df.type.isin(["CI", "AI_CI"])]
-    df = df[df.name.isin(combined_fos)]
-
-    df["year"] = df.year.astype(int)
-
-    lst = []
-    for year in df.year.unique():
-        for name in df.name.unique():
-            if len(df[(df.name == name) & (df.year == year)]["type"].values) == 2:
-                continue
-            elif len(df[(df.name == name) & (df.year == year)]["type"].values) == 1:
-                if df[(df.name == name) & (df.year == year)]["type"].values[0] == "CI":
-                    lst.append(
-                        {"type": "AI_CI", "year": year, "name": name, "paper_id": 0}
-                    )
-                else:
-                    lst.append(
-                        {"type": "CI", "year": year, "name": name, "paper_id": 0}
-                    )
-            else:
-                lst.append({"type": "AI_CI", "year": year, "name": name, "paper_id": 0})
-                lst.append({"type": "CI", "year": year, "name": name, "paper_id": 0})
-
-    df = pd.concat([df, pd.DataFrame(lst)])
-
-    fraq = []
-    for _, row in df.iterrows():
-        fraq.append(
-            (
-                row["paper_id"]
-                / df[(df.type == row["type"]) & (df.year == row["year"])][
-                    "paper_id"
-                ].sum()
-            )
-            * 100
-        )
-
-    df["fraq"] = fraq
-    df = df.fillna(0)
+def _fos_plot(df, filename, fos_level=""):
 
     slider = alt.binding_range(min=2000, max=2020, step=1)
     select_year = alt.selection_single(
@@ -402,6 +371,125 @@ def annual_fields_of_study_usage(
     )
     f.save(f"{ci_mapping.project_dir}/reports/figures/{filename}_{fos_level}.html")
     logger.info(f"Stored {filename}_{fos_level} plot.")
+
+
+def annual_fields_of_study_usage(
+    data,
+    pfos,
+    fos_metadata,
+    fos_levels,
+    preselected_fos=[],
+    top_n=None,
+    filename="annual_fields_of_study_usage",
+):
+    """Field of study comparison for CI, AI+CI. 
+
+    Args:
+        data (`pd.DataFrame`): MAG paper data.
+        pfos (`pd.DataFrame`): Paper-level fields of study.
+        fos_metadata (`pd.DataFrame`): Level of the FoS in MAG hierarchy.
+        fos_level (int): Level in the MAG hierarchy to plot for.
+        top_n (int): Number of most used FoS to plot.
+        filename (str): Name of the HTML file to store the plot.
+
+    """
+    df = data.merge(pfos, left_on="id", right_on="paper_id").merge(
+        fos_metadata, left_on="field_of_study_id", right_on="id"
+    )
+    df = df[["paper_id", "type", "year", "name", "level"]]
+    df = df[df.type.isin(["CI", "AI_CI"])]
+    df["year"] = df.year.astype(int)
+
+    most_used_fos_by_level_and_type = flatten_lists(
+        flatten_lists(
+            [
+                [
+                    list(
+                        df[(df.level == fos_level) & (df.type == type_)]
+                        .name.value_counts()
+                        .index[:top_n]
+                    )
+                    for fos_level in fos_levels
+                ]
+                for type_ in df["type"].unique()
+            ]
+        )
+    )
+    df = df[df.name.isin(set(most_used_fos_by_level_and_type))]
+    df = pd.DataFrame(
+        df.groupby(["type", "year", "name", "level"])["paper_id"].count()
+    ).reset_index()
+
+    lst = []
+    for year in df.year.unique():
+        for name in df.name.unique():
+            if len(df[(df.name == name) & (df.year == year)]["type"].values) == 2:
+                continue
+            elif len(df[(df.name == name) & (df.year == year)]["type"].values) == 1:
+                if df[(df.name == name) & (df.year == year)]["type"].values[0] == "CI":
+                    lst.append(
+                        {
+                            "type": "AI_CI",
+                            "year": year,
+                            "name": name,
+                            "paper_id": 0,
+                            "level": df[df.name == name]["level"].values[0],
+                        }
+                    )
+                else:
+                    lst.append(
+                        {
+                            "type": "CI",
+                            "year": year,
+                            "name": name,
+                            "paper_id": 0,
+                            "level": df[df.name == name]["level"].values[0],
+                        }
+                    )
+            else:
+                lst.append(
+                    {
+                        "type": "AI_CI",
+                        "year": year,
+                        "name": name,
+                        "paper_id": 0,
+                        "level": df[df.name == name]["level"].values[0],
+                    }
+                )
+                lst.append(
+                    {
+                        "type": "CI",
+                        "year": year,
+                        "name": name,
+                        "paper_id": 0,
+                        "level": df[df.name == name]["level"].values[0],
+                    }
+                )
+
+    df = pd.concat([df, pd.DataFrame(lst)])
+
+    fraq = []
+    for _, row in df.iterrows():
+        fraq.append(
+            (
+                row["paper_id"]
+                / data[
+                    (data.type == row["type"]) & (data.year == str(row["year"]))
+                ].shape[0]
+            )
+            * 100
+        )
+
+    df["fraq"] = fraq
+    df = df.fillna(0)
+
+    if not preselected_fos:
+        for fos_level in fos_levels:
+            _fos_plot(df[df.level == fos_level], filename, fos_level=fos_level)
+    else:
+        _fos_plot(
+            df[df.name.isin(preselected_fos)], filename, fos_level="preselected_fos"
+        )
 
 
 def papers_in_journals_and_conferences(

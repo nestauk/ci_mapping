@@ -327,5 +327,15 @@ open_access:
         "arxiv number theory",
     ]
 plots:
-    fos_levels: [1, 2, 3, 4]
+    fos_levels: [0, 1, 2, 3, 4]
     top_n: 20
+    preselected_fos:
+        [
+            "Artificial intelligence",
+            "Coronavirus disease 2019 (COVID-19)",
+            "Human–computer interaction",
+            "Speech recognition",
+            "Artificial intelligence",
+            "Collective wisdom",
+            "Social media",
+        ]
