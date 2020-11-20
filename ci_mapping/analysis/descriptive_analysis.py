@@ -379,6 +379,7 @@ def annual_fields_of_study_usage(
     fos_metadata,
     fos_levels,
     preselected_fos=[],
+    excluded_fos=[],
     top_n=None,
     filename="annual_fields_of_study_usage",
 ):
@@ -416,6 +417,7 @@ def annual_fields_of_study_usage(
         )
     )
     df = df[df.name.isin(set(most_used_fos_by_level_and_type))]
+    df = df[~df.name.isin(set(excluded_fos))]
     df = pd.DataFrame(
         df.groupby(["type", "year", "name", "level"])["paper_id"].count()
     ).reset_index()

@@ -152,6 +152,16 @@ class CollectiveIntelligenceFlow(FlowSpec):
         help="FoS to use in Figure 7.",
         default=plot_config["preselected_fos"],
     )
+    excluded_fos = Parameter(
+        "excluded_fos",
+        help="FoS to NOT use in Figure 7.",
+        default=plot_config["excluded_fos"],
+    )
+    fos_mapping = Parameter(
+        "fos_mapping",
+        help="Merge FoS based on a given mapping.",
+        default=plot_config["fos_mapping"],
+    )
 
     def _create_session(self):
         """Creates a PostgreSQL session."""
@@ -495,6 +505,11 @@ class CollectiveIntelligenceFlow(FlowSpec):
         self.pfos = pfos.merge(fos, left_on="field_of_study_id", right_on="id")[
             ["paper_id", "field_of_study_id", "name"]
         ]
+        # That's very hacky, sorry :(
+        self.pfos["name"] = [
+            self.fos_mapping[n] if n in self.fos_mapping.keys() else n
+            for n in self.pfos.name
+        ]
         self.fos_metadata = pd.read_sql(s.query(FosMetadata).statement, s.bind)
 
         # Data wrangling
@@ -519,15 +534,24 @@ class CollectiveIntelligenceFlow(FlowSpec):
         # Figure 6: Adoption of open access by CI, AI+CI
         open_access_publications(self.data, self.journals, self.open_access)
         # Figure 7: Field of study comparison for CI, AI+CI.
-        # for fos_level in self.fos_levels:
         annual_fields_of_study_usage(
             self.data,
             self.pfos,
             self.fos_metadata,
             self.fos_levels,
             top_n=self.top_n,
-            preselected_fos=[]
+            preselected_fos=[],
+            excluded_fos=self.excluded_fos
             # preselected_fos=self.preselected_fos,
+        )
+        annual_fields_of_study_usage(
+            self.data,
+            self.pfos,
+            self.fos_metadata,
+            self.fos_levels,
+            top_n=self.top_n,
+            excluded_fos=self.excluded_fos,
+            preselected_fos=self.preselected_fos,
         )
         # Figure 8: Annual publications in conferences and journals.
         papers_in_journals_and_conferences(
