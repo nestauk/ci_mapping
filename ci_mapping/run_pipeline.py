@@ -1,4 +1,4 @@
-"""This pipeline is heavily based on Orion https://github.com/orion-search/orion.
+"""This pipeline is based on Orion https://github.com/orion-search/orion.
 For bugs/issues, contact the Nesta team or myself at k.stathou@gmail.com.
 """
 
@@ -56,6 +56,7 @@ from ci_mapping.analysis.descriptive_analysis import (
     open_access_publications,
     annual_fields_of_study_usage,
     papers_in_journals_and_conferences,
+    annual_publication_count,
 )
 from ci_mapping.analysis.data_cleaning import (
     clean_data,
@@ -70,7 +71,24 @@ plot_config = ci_mapping.config["plots"]
 
 class CollectiveIntelligenceFlow(FlowSpec):
     """
-    docstring
+    Metaflow pipeline running the analysis of the CI research landscape.
+
+    Steps:
+        1. Create a PostgreSQL database and the required tables as shown in the ER diagram.
+            If they already exist, the initialisation is skipped.
+        2. Collect papers from MAG based on Fields of Study (FoS).
+            The pickled responses are stored locally in data/raw/.
+        3. Parse the MAG API response in a PostgreSQL database.
+        4. Collect the level of a Field of Study in MAG's hierarchy.
+        5. Tag papers as CI and AI+CI. This method could be modified to divide a
+            dataset to core and control groups.
+        6. Geocode author affiliation using Google Places API.
+        7. Tag journals as open access based on a seed list.
+        8. Find the type (industry, non-industry) of affiliations based on a seed list.
+        9. Process the data used in EDA. This involves changing data types, merging and
+            grouping tables.
+        10. Exploratory data analysis of the CI research landscape.
+
     """
 
     db_name = Parameter(
@@ -146,6 +164,21 @@ class CollectiveIntelligenceFlow(FlowSpec):
         help="Number of most used FoS to plot in Figure 7.",
         default=plot_config["top_n"],
     )
+    preselected_fos = Parameter(
+        "preselected_fos",
+        help="FoS to use in Figure 7.",
+        default=plot_config["preselected_fos"],
+    )
+    excluded_fos = Parameter(
+        "excluded_fos",
+        help="FoS to NOT use in Figure 7.",
+        default=plot_config["excluded_fos"],
+    )
+    fos_mapping = Parameter(
+        "fos_mapping",
+        help="Merge FoS based on a given mapping.",
+        default=plot_config["fos_mapping"],
+    )
 
     def _create_session(self):
         """Creates a PostgreSQL session."""
@@ -156,12 +189,14 @@ class CollectiveIntelligenceFlow(FlowSpec):
         return Session()
 
     def _is_open_access(self, name):
+        """Tag papers as open access based on a seed list."""
         if name in set(self.oa_journals):
             return 1
         else:
             return 0
 
     def _find_non_industry_affiliations(self, name):
+        """Tag affiliations as non-industry based on a seed list."""
         if any(val in name for val in self.non_industry):
             return 1
         else:
@@ -489,6 +524,11 @@ class CollectiveIntelligenceFlow(FlowSpec):
         self.pfos = pfos.merge(fos, left_on="field_of_study_id", right_on="id")[
             ["paper_id", "field_of_study_id", "name"]
         ]
+        # That's very hacky, sorry :(
+        self.pfos["name"] = [
+            self.fos_mapping[n] if n in self.fos_mapping.keys() else n
+            for n in self.pfos.name
+        ]
         self.fos_metadata = pd.read_sql(s.query(FosMetadata).statement, s.bind)
 
         # Data wrangling
@@ -513,14 +553,31 @@ class CollectiveIntelligenceFlow(FlowSpec):
         # Figure 6: Adoption of open access by CI, AI+CI
         open_access_publications(self.data, self.journals, self.open_access)
         # Figure 7: Field of study comparison for CI, AI+CI.
-        for fos_level in self.fos_levels:
-            annual_fields_of_study_usage(
-                self.data, self.pfos, self.fos_metadata, fos_level, self.top_n
-            )
+        annual_fields_of_study_usage(
+            self.data,
+            self.pfos,
+            self.fos_metadata,
+            self.fos_levels,
+            top_n=self.top_n,
+            preselected_fos=[],
+            excluded_fos=self.excluded_fos
+            # preselected_fos=self.preselected_fos,
+        )
+        annual_fields_of_study_usage(
+            self.data,
+            self.pfos,
+            self.fos_metadata,
+            self.fos_levels,
+            top_n=self.top_n,
+            excluded_fos=self.excluded_fos,
+            preselected_fos=self.preselected_fos,
+        )
         # Figure 8: Annual publications in conferences and journals.
         papers_in_journals_and_conferences(
             self.data, self.journals, self.conferences, self.top_n
         )
+        # Figure 9: Annual publication count
+        annual_publication_count(self.data)
 
         self.next(self.end)
 
