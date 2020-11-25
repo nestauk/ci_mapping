@@ -118,7 +118,13 @@ def publications_by_affiliation_type(data, filename="publications_by_affiliation
         for cat in data.type.unique():
             df = data[data.non_company == num].drop_duplicates("paper_id")
             nominator = df[df.type == cat].groupby("year")["paper_id"].count()
-            denominator = df[df.type == cat].groupby("year")["paper_id"].count().iloc[0]
+            try:
+                denominator = (
+                    df[df.type == cat].groupby("year")["paper_id"].count().iloc[0]
+                )
+            except IndexError:
+                denominator = 0
+
             frame = pd.DataFrame(nominator / denominator).reset_index()
             frame = pd.DataFrame(frame).rename(index=str, columns={"paper_id": "value"})
             frame["type"] = cat
